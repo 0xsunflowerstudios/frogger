@@ -1,91 +1,116 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Game, AUTO } from "phaser";
-import NinePatchPlugin from "phaser3-rex-plugins/plugins/ninepatch-plugin.js";
-import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
+import React, { useContext } from "react";
 
-import { Preloader } from "features/world/scenes/Preloader";
-import { FroggerScene } from "./FroggerScene";
-import { OFFLINE_FARM } from "features/game/lib/landData";
-import { InnerPanel } from "components/ui/Panel";
+import { useActor } from "@xstate/react";
+import { Modal } from "react-bootstrap";
+import { Panel } from "components/ui/Panel";
+import { Button } from "components/ui/Button";
+
+import { Ocean } from "features/world/ui/Ocean";
 import { Label } from "components/ui/Label";
 import { SUNNYSIDE } from "assets/sunnyside";
-import { Modal } from "react-bootstrap";
-import { CloseButtonPanel } from "features/game/components/CloseablePanel";
-import { FroggerModals } from "./FroggerModals";
+import { NPC_WEARABLES } from "lib/npcs";
+import { secondsTillReset } from "features/helios/components/hayseedHank/HayseedHankV2";
+import { secondsToString } from "lib/utils/time";
+
+import { FroggerPhaser } from "./FroggerPhaser";
+import { PortalContext, PortalProvider } from "./lib/PortalProvider";
+import { authorisePortal, goHome } from "./lib/portalUtil";
+
+export const FroggerApp: React.FC = () => {
+  return (
+    <PortalProvider>
+      <Ocean>
+        <Frogger />
+      </Ocean>
+    </PortalProvider>
+  );
+};
 
 export const Frogger: React.FC = () => {
-  const [loaded, setLoaded] = useState(false);
-  const game = useRef<Game>();
-
-  const scene = "frogger";
-
-  const scenes = [Preloader, FroggerScene];
-
-  useEffect(() => {
-    const config: Phaser.Types.Core.GameConfig = {
-      type: AUTO,
-      fps: {
-        target: 30,
-        smoothStep: true,
-      },
-      backgroundColor: "#000000",
-      parent: "phaser-example",
-
-      autoRound: true,
-      pixelArt: true,
-      plugins: {
-        global: [
-          {
-            key: "rexNinePatchPlugin",
-            plugin: NinePatchPlugin,
-            start: true,
-          },
-          {
-            key: "rexVirtualJoystick",
-            plugin: VirtualJoystickPlugin,
-            start: true,
-          },
-        ],
-      },
-      width: window.innerWidth,
-      height: window.innerHeight,
-
-      physics: {
-        default: "arcade",
-        arcade: {
-          debug: true,
-          gravity: { y: 0 },
-        },
-      },
-      scene: scenes,
-      loader: {
-        crossOrigin: "anonymous",
-      },
-    };
-
-    game.current = new Game({
-      ...config,
-      parent: "game-content",
-    });
-
-    game.current.registry.set("initialScene", scene);
-
-    game.current.registry.set("initialScene", scene);
-    game.current.registry.set("gameState", OFFLINE_FARM);
-
-    setLoaded(true);
-
-    return () => {
-      game.current?.destroy(true);
-    };
-  }, []);
-
-  const ref = useRef<HTMLDivElement>(null);
+  const { portalService } = useContext(PortalContext);
+  const [portalState] = useActor(portalService);
 
   return (
     <div>
-      <div id="game-content" ref={ref} />
-      <FroggerModals />
+      {portalState.matches("error") && (
+        <Modal centered show>
+          <Panel>
+            <div className="p-2">
+              <Label type="danger">Error</Label>
+              <span className="text-sm my-2">Something went wrong</span>
+            </div>
+            <Button onClick={() => portalService.send("RETRY")}>Retry</Button>
+          </Panel>
+        </Modal>
+      )}
+
+      {portalState.matches("loading") && (
+        <Modal centered show>
+          <Panel>
+            <span className="loading">Loading</span>
+          </Panel>
+        </Modal>
+      )}
+
+      {portalState.matches("unauthorised") && (
+        <Modal centered show>
+          <Panel>
+            <div className="p-2">
+              <Label type="danger">Error</Label>
+              <span className="text-sm my-2">Your session has expired</span>
+            </div>
+            <Button onClick={authorisePortal}>Login</Button>
+          </Panel>
+        </Modal>
+      )}
+
+      {portalState.matches("idle") && (
+        <Modal centered show>
+          <Panel>
+            <Button onClick={() => portalService.send("START")}>Start</Button>
+          </Panel>
+        </Modal>
+      )}
+
+      {portalState.matches("claiming") && (
+        <Modal centered show>
+          <Panel>
+            <p className="loading">Loading</p>
+          </Panel>
+        </Modal>
+      )}
+
+      {portalState.matches("completed") && (
+        <Modal centered show>
+          <Panel bumpkinParts={NPC_WEARABLES.wizard}>
+            <div className="p-2">
+              <p className="mb-2">
+                {`Congratulations, you have completed today's challenge.`}
+              </p>
+              <p className="text-sm mb-1">
+                Come back later for a brand new puzzle!
+              </p>
+              <Label type="info" icon={SUNNYSIDE.icons.timer}>
+                {secondsToString(secondsTillReset(), { length: "medium" })}
+              </Label>
+            </div>
+            <div className="flex">
+              <Button onClick={goHome} className="mr-1">
+                Go home
+              </Button>
+              <Button onClick={() => portalService.send("CONTINUE")}>
+                Play again
+              </Button>
+            </div>
+          </Panel>
+        </Modal>
+      )}
+
+      {portalState.context.state && (
+        <>
+          <FroggerPhaser />
+        </>
+      )}
     </div>
   );
 };

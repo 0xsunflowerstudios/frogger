@@ -11,13 +11,13 @@ import { CropBoomApp } from "./examples/cropBoom/CropBoom";
 import { MushroomForest } from "./examples/mushroomForest/MushroomForest";
 import { CONFIG } from "lib/config";
 import { GoblinSwarm } from "./examples/goblinSwarm/GoblinSwarm";
-import { Frogger } from "./examples/frogger/Frogger";
+import { FroggerApp } from "./examples/frogger/Frogger";
 
 initialise();
 
 export const PortalApp: React.FC = () => {
   if (CONFIG.PORTAL_APP === "frogger") {
-    return <Frogger />;
+    return <FroggerApp />;
   }
 
   if (CONFIG.PORTAL_APP === "crop-boom") {
