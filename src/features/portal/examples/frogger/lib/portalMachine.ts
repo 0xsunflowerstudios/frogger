@@ -11,6 +11,7 @@ import { SPAWNS } from "features/world/lib/spawn";
 import { decodeToken } from "features/auth/actions/login";
 
 const getJWT = () => {
+  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZGRyZXNzIjoiMHg0NjAzZDMyNjYzNGZCNjRGQjAxZGU3MkRCMUI4NkJmRDBkNDFENjFjIiwidXNlckFjY2VzcyI6eyJ2ZXJpZmllZCI6dHJ1ZSwiY3JlYXRlRmFybSI6dHJ1ZSwibWludENvbGxlY3RpYmxlIjp0cnVlLCJzeW5jIjp0cnVlLCJ3aXRoZHJhdyI6dHJ1ZX0sImZhcm1JZCI6NDQsInBvcnRhbElkIjoiZnJvZ2dlciIsImlhdCI6MTcwMzIxOTAyNywiZXhwIjoxNzA1ODExMDI3fQ.85VHPsFtrhEKYcF20monSZfnzU20YOV3igfbsO6AODo";
   const code = new URLSearchParams(window.location.search).get("jwt");
 
   return code;

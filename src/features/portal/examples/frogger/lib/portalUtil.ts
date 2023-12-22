@@ -11,9 +11,13 @@ export function goHome() {
 }
 
 export function authorisePortal() {
+  console.log({ isInIframe });
   if (isInIframe) {
     window.parent.postMessage("closePortal", "*");
   } else {
+    console.log({
+      gotTO: `${CONFIG.PORTAL_GAME_URL}?portal=${CONFIG.PORTAL_APP}`,
+    });
     window.location.href = `${CONFIG.PORTAL_GAME_URL}?portal=${CONFIG.PORTAL_APP}`;
   }
 }

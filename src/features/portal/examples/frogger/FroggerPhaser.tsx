@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Game, AUTO } from "phaser";
 import NinePatchPlugin from "phaser3-rex-plugins/plugins/ninepatch-plugin.js";
 import VirtualJoystickPlugin from "phaser3-rex-plugins/plugins/virtualjoystick-plugin.js";
@@ -12,8 +12,13 @@ import { SUNNYSIDE } from "assets/sunnyside";
 import { Modal } from "react-bootstrap";
 import { CloseButtonPanel } from "features/game/components/CloseablePanel";
 import { FroggerModals } from "./FroggerModals";
+import { PortalContext } from "./lib/PortalProvider";
+import { useActor } from "@xstate/react";
 
 export const FroggerPhaser: React.FC = () => {
+  const { portalService } = useContext(PortalContext);
+  const [portalState] = useActor(portalService);
+
   const [loaded, setLoaded] = useState(false);
   const game = useRef<Game>();
 
@@ -71,7 +76,9 @@ export const FroggerPhaser: React.FC = () => {
     game.current.registry.set("initialScene", scene);
 
     game.current.registry.set("initialScene", scene);
-    game.current.registry.set("gameState", OFFLINE_FARM);
+    game.current.registry.set("gameState", portalState.context.state);
+    game.current.registry.set("id", portalState.context.id);
+    game.current.registry.set("mmoServer", portalState.context.mmoServer);
 
     setLoaded(true);
 

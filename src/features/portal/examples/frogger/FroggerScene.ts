@@ -5,6 +5,8 @@ import { SQUARE_WIDTH } from "features/game/lib/constants";
 import { SPAWNS } from "features/world/lib/spawn";
 import { SceneId } from "features/world/mmoMachine";
 import { BaseScene } from "features/world/scenes/BaseScene";
+import { SUNNYSIDE } from "assets/sunnyside";
+import { CROP_LIFECYCLE } from "features/island/plots/lib/plant";
 
 const PLANK_VELOCITY = [-10, 20, -20, 10]; // Adjust the velocity as needed
 const PLANK_ROW_Y = [34.5, 33.5, 32.5, 31.5]; // Adjust the velocity as needed
@@ -31,6 +33,8 @@ export class FroggerScene extends BaseScene {
       frameHeight: 32,
     });
 
+    this.load.image("pumpkin", CROP_LIFECYCLE.Pumpkin.crop);
+
     this.load.image("plank_1", "world/plank_1.png");
     this.load.image("plank_2", "world/plank_2.png");
     this.load.image("plank_3", "world/plank_3.png");
@@ -45,6 +49,24 @@ export class FroggerScene extends BaseScene {
     super.create();
 
     this.physics.world.drawDebug = true;
+
+    const pumpkin = this.add.sprite(231, 588, "pumpkin");
+
+    this.physics.world.enable([pumpkin]);
+
+    if (pumpkin.body) {
+      pumpkin.body.setImmovable(true).setCollideWorldBounds(true);
+
+      this.physics.add.collider(
+        this.currentPlayer,
+        pumpkin,
+        () => {
+          this.win();
+        },
+        null,
+        this
+      );
+    }
 
     const chicken = this.add.sprite(322, 568, "chicken");
     // turtle.setScale(-1, 1);
@@ -217,10 +239,15 @@ export class FroggerScene extends BaseScene {
     this.currentPlayer.y = SPAWNS.frogger.default.y;
   }
 
+  win() {
+    PubSub.publish("WIN");
+  }
+
   updateChickens() {}
 
   update() {
     this.updatePlayer();
+    this.updateOtherPlayers();
     this.crossTheRiver();
     this.updateChickens();
 

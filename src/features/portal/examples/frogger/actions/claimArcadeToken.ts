@@ -11,21 +11,18 @@ const API_URL = CONFIG.API_URL;
 
 export async function claimArcadeToken(request: Request) {
   // Uses same autosave event driven endpoint
-  const response = await window.fetch(
-    `${API_URL}/portal/${CONFIG.PORTAL_APP}/mint`,
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json;charset=UTF-8",
-        Authorization: `Bearer ${request.token}`,
+  const response = await window.fetch(`${API_URL}/portal/tutorial/mint`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json;charset=UTF-8",
+      Authorization: `Bearer ${request.token}`,
+    },
+    body: JSON.stringify({
+      items: {
+        "Arcade Token": 1,
       },
-      body: JSON.stringify({
-        items: {
-          "Arcade Token": 1,
-        },
-      }),
-    }
-  );
+    }),
+  });
 
   if (response.status >= 400) {
     throw new Error(ERRORS.PORTAL_LOGIN_ERROR);
