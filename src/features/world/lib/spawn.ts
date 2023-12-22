@@ -7,6 +7,12 @@ export type SpawnLocation = Record<
 >;
 
 export const SPAWNS: SpawnLocation = {
+  frogger: {
+    default: {
+      x: 250,
+      y: 600,
+    },
+  },
   crop_boom: {
     default: {
       x: 220,

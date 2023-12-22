@@ -245,7 +245,7 @@ export abstract class BaseScene extends Phaser.Scene {
 
     const christmas = this.map.addTilesetImage(
       "Sunnyside V3",
-      "christmas-tileset",
+      "tileset",
       16,
       16,
       1,
